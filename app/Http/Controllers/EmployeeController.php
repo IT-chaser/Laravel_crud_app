@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
-use App\Employee;
+use Illuminate\Support\Facades\Validator;
+use App\Models\Employee;
+use App\User;
 
 class EmployeeController extends Controller
 {
