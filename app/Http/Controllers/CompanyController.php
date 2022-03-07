@@ -1,108 +1,126 @@
 <?php
-
+    
 namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-
-use Illuminate\Support\Facades\Validator;
+    
 use App\Models\Company;
-use App\User;
-
+use Illuminate\Http\Request;
+    
 class CompanyController extends Controller
-{
-    private $status     =   200;
-    // --------------- [ Save Company function ] -------------
-    public function createCompany(Request $request) {
-
-        // validate inputs
-        $validator          =       Validator::make($request->all(),
-            [
-                "company_name"      =>      "required",
-                "ceo_name"          =>      "required",
-                "address"           =>      "required",
-                "email"             =>      "required|email", 
-                "website"           =>      "required", 
-                "phone_number"      =>      "required|numeric"
-            ]
-        );
-
-        // if validation fails
-        if($validator->fails()) {
-            return response()->json(["status" => "failed", "validation_errors" => $validator->errors()]);
-        }
-
-        $company_id             =       $request->id;
-         $companyArray           =       array(
-            "company_name"            =>      $request->company_name,
-            "ceo_name"             =>      $request->ceo_name,
-            "address"             =>      $request->address,
-            "email"                 =>      $request->email,
-            "website"           =>          $request->website,
-            "phone_number"                 =>      $request->phone_number
-        );
-
-        if($company_id !="") {           
-            $company              =         Company::find($company_id);
-            if(!is_null($company)){
-                $updated_status     =       company::where("id", $company_id)->update($companyArray);
-                if($updated_status == 1) {
-                    return response()->json(["status" => $this->status, "success" => true, "message" => "company detail updated successfully"]);
-                }
-                else {
-                    return response()->json(["status" => "failed", "message" => "Whoops! failed to update, try again."]);
-                }               
-            }                   
-        }
-
-        else {
-            $company        =       Company::create($companyArray);
-            if(!is_null($company)) {            
-                return response()->json(["status" => $this->status, "success" => true, "message" => "company record created successfully", "data" => $company]);
-            }    
-            else {
-                return response()->json(["status" => "failed", "success" => false, "message" => "Whoops! failed to create."]);
-            }
-        }        
+{ 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    function __construct()
+    {
+         $this->middleware('permission:company-list|company-create|company-edit|company-delete', ['only' => ['index','show']]);
+         $this->middleware('permission:company-create', ['only' => ['create','store']]);
+         $this->middleware('permission:company-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:company-delete', ['only' => ['destroy']]);
     }
-
-    // --------------- [ Companies Listing ] -------------------
-    public function companiesListing() {
-        $companies       =       Company::all();
-        if(count($companies) > 0) {
-            return response()->json(["status" => $this->status, "success" => true, "count" => count($companies), "data" => $companies]);
-        }
-        else {
-            return response()->json(["status" => "failed", "success" => false, "message" => "Whoops! no record found"]);
-        }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $companies = Company::latest()->paginate(5);
+        return view('companies.index',compact('companies'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
     }
-
-    // --------------- [ Company Detail ] ----------------
-    public function companyDetail($id) {
-        $company        =       Company::find($id);
-        if(!is_null($company)) {
-            return response()->json(["status" => $this->status, "success" => true, "data" => $company]);
-        }
-        else {
-            return response()->json(["status" => "failed", "success" => false, "message" => "Whoops! no company found"]);
-        }
+    
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('companies.create');
     }
-//---------------- [ Delete Company ] ----------
-    public function companyDelete($id) {
-        $company        =       Company::find($id);
-        if(!is_null($company)) {
-            $delete_status      =       Company::where("id", $id)->delete();
-            if($delete_status == 1) {
-                return response()->json(["status" => $this->status, "success" => true, "message" => "company record deleted successfully"]);
-            }
-            else{
-                return response()->json(["status" => "failed", "message" => "failed to delete, please try again"]);
-            }
-        }
-        else {
-            return response()->json(["status" => "failed", "message" => "Whoops! no company found with this id"]);
-        }
+    
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        request()->validate([
+            "company_name"      =>      "required",
+            "ceo_name"          =>      "required",
+            "address"           =>      "required",
+            "email"             =>      "required|email", 
+            "website"           =>      "required", 
+            "phone_number"      =>      "required|numeric"
+        ]);
+    
+        Company::create($request->all());
+    
+        return redirect()->route('companies.index')
+                        ->with('success','Company created successfully.');
+    }
+    
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Company $company)
+    {
+        return view('companies.show',compact('company'));
+    }
+    
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Company $company)
+    {
+        return view('companies.edit',compact('company'));
+    }
+    
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Company $company)
+    {
+         request()->validate([
+            "company_name"      =>      "required",
+            "ceo_name"          =>      "required",
+            "address"           =>      "required",
+            "email"             =>      "required|email", 
+            "website"           =>      "required", 
+            "phone_number"      =>      "required|numeric"
+        ]);
+    
+        $company->update($request->all());
+    
+        return redirect()->route('companies.index')
+                        ->with('success','Company updated successfully');
+    }
+    
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Company $company)
+    {
+        $company->delete();
+    
+        return redirect()->route('companies.index')
+                        ->with('success','Company deleted successfully');
     }
 }
