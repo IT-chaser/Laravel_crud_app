@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Employee;
 use App\User;
 
-class EmployeeController extends Controller
+class EmployeeController1 extends Controller
 {
     private $status     =   200;
     // --------------- [ Save Employee function ] -------------

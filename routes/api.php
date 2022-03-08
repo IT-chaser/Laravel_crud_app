@@ -23,7 +23,7 @@ use App\Http\Controllers\EmployeeController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Auth::routes();
+/*Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -32,19 +32,19 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('users', UserController::class);
     Route::resource('companies', CompanyController::class);
     Route::resource('employees', EmployeeController::class);
-});
-Route::post("create-company","App\Http\Controllers\CompanyController@createCompany");
+});*/
+Route::post("create-company","App\Http\Controllers\CompanyController1@createCompany");
 
-Route::get("companies", "App\Http\Controllers\CompanyController@companiesListing");
+Route::get("companies", "App\Http\Controllers\CompanyController1@companiesListing");
 
-Route::get("company/{id}", "App\Http\Controllers\CompanyController@companyDetail");
+Route::get("company/{id}", "App\Http\Controllers\CompanyController1@companyDetail");
 
-Route::delete("company/{id}", "App\Http\Controllers\CompanyController@companyDelete");
+Route::delete("company/{id}", "App\Http\Controllers\CompanyController1@companyDelete");
 
-Route::post("create-employee","App\Http\Controllers\EmployeeController@createEmployee");
+Route::post("create-employee","App\Http\Controllers\EmployeeController1@createEmployee");
 
-Route::get("employees", "App\Http\Controllers\EmployeeController@employeesListing");
+Route::get("employees", "App\Http\Controllers\EmployeeController1@employeesListing");
 
-Route::get("employee/{id}", "App\Http\Controllers\EmployeeController@employeeDetail");
+Route::get("employee/{id}", "App\Http\Controllers\EmployeeController1@employeeDetail");
 
-Route::delete("employee/{id}", "App\Http\Controllers\EmployeeController@employeeDelete");
+Route::delete("employee/{id}", "App\Http\Controllers\EmployeeController1@employeeDelete");

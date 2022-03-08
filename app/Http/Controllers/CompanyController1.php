@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Company;
 use App\User;
 
-class CompanyController extends Controller
+class CompanyController1 extends Controller
 {
     private $status     =   200;
     // --------------- [ Save Company function ] -------------
